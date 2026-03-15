@@ -60,12 +60,13 @@
             document.getElementById('userMail').innerText = user.email;
             // Կարդում ենք ըստ քո Firestore-ի Document ID-ի (email-ի)
             onSnapshot(doc(db, "users", user.email), (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    document.getElementById('dispCoins').innerText = data.coins || 0;
-                    document.getElementById('dispLevel').innerText = data.level || 1;
-                }
-            });
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        console.log("Բազայից եկած տվյալը:", data); // Սա ստուգելու համար է
+        document.getElementById('dispCoins').innerText = data.coins !== undefined ? data.coins : "Չկա";
+        document.getElementById('dispLevel').innerText = data.level || 1;
+    }
+});
         } else {
             window.location.href = "index.html";
         }
