@@ -2,93 +2,58 @@
 <html lang="hy">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MRGH - Dashboard</title>
     <link href="https://fonts.cdnfonts.com/css/minecraft-ia" rel="stylesheet">
-    
     <style>
         body {
-            background: #313131 url('https://www.minecraft.net/content/dam/games/minecraft/key-art/Games_Subnav_Minecraft-Wild-Update_600x338.jpg') no-repeat center center fixed;
+            background: #1e1e1e url('https://www.minecraft.net/content/dam/games/minecraft/key-art/Games_Subnav_Minecraft-Wild-Update_600x338.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Minecraft', sans-serif;
             color: white;
             margin: 0;
             text-shadow: 2px 2px #000;
         }
-
-        .top-nav {
-            background: rgba(0, 0, 0, 0.85);
-            border-bottom: 4px solid #3c3c3c;
-            padding: 15px 20px;
+        .stats-bar {
+            background: rgba(0,0,0,0.85);
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 4px solid #3c3c3c;
         }
-
-        .stat-box { display: flex; align-items: center; gap: 15px; }
-        .coins-val { color: #FFD700; font-size: 20px; }
-        .level-val { color: #32CD32; font-size: 20px; }
-
         .logout-btn {
             background: #aa0000;
-            border: 3px solid #000;
+            border: 2px solid #000;
             color: white;
-            padding: 8px 15px;
+            padding: 5px 15px;
             cursor: pointer;
             font-family: 'Minecraft', sans-serif;
-            box-shadow: 0 4px #550000;
         }
-
         .logout-btn:hover { background: #ff0000; }
-        .logout-btn:active { transform: translateY(2px); box-shadow: 0 2px #550000; }
-
-        .container {
-            height: 70vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-
-        .menu-panel {
-            background: rgba(0, 0, 0, 0.7);
+        .xp-val { color: #32CD32; }
+        .gold-val { color: #FFD700; }
+        .main-card {
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
             border: 4px solid #1e1e1e;
-            padding: 40px;
             text-align: center;
+            margin: 100px auto;
             max-width: 400px;
-        }
-
-        .mc-button {
-            background: #484948;
-            border: 4px solid #000;
-            color: #e0e0e0;
-            padding: 12px 25px;
-            font-family: 'Minecraft', sans-serif;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-<div class="top-nav">
-    <div class="stat-box">
-        <span>LEVEL: <span id="dispLevel" class="level-val">...</span></span>
-    </div>
-    <div class="stat-box">
-        <span>COINS: <span id="dispCoins" class="coins-val">...</span></span>
-    </div>
-    <button class="logout-btn" id="logoutBtn">LOGOUT</button>
+<div class="stats-bar">
+    <div>LEVEL: <span id="dispLevel" class="xp-val">...</span></div>
+    <div>COINS: <span id="dispCoins" class="gold-val">...</span></div>
+    <button class="logout-btn" id="logoutBtn">ԴՈՒՐՍ ԳԱԼ</button>
 </div>
 
-<div class="container">
-    <div class="menu-panel">
-        <h1 style="font-size: 24px;">ՔՈ ՊՐՈՖԻԼԸ</h1>
-        <p id="userMail" style="color: #bbb; font-size: 14px;"></p>
-        <hr style="border: 1px solid #444;">
-        <button class="mc-button">ԻՄ TASKS</button>
-    </div>
+<div class="main-card">
+    <h1>ՔՈ ՊՐՈՖԻԼԸ</h1>
+    <p id="userMail" style="font-size: 12px; color: #bbb;"></p>
+    <div id="debugStatus" style="font-size: 10px; color: #ff4444; margin-top: 10px;"></div>
 </div>
 
 <script type="module">
@@ -109,44 +74,39 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Logout ֆունկցիան
+    // Logout
     document.getElementById('logoutBtn').onclick = () => {
         signOut(auth).then(() => { window.location.href = "index.html"; });
     };
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Դարձնում ենք փոքրատառ և մաքրում ենք պրոբելները
             const userEmail = user.email.toLowerCase().trim();
             document.getElementById('userMail').innerText = userEmail;
 
-            console.log("Փնտրում եմ բազայում այս ID-ն:", userEmail);
-
-            // Կարդում ենք Firestore-ից
-            onSnapshot(doc(db, "users", userEmail), (docSnap) => {
+            // Ավտոմատ կապ Firestore-ի հետ
+            const docRef = doc(db, "users", userEmail);
+            
+            onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    console.log("Տվյալները գտնվեցին!", data);
-                    
-                    // Ցուցադրում ենք Coins և Level
                     document.getElementById('dispCoins').innerText = (data.coins !== undefined) ? data.coins : "0";
                     document.getElementById('dispLevel').innerText = (data.level !== undefined) ? data.level : "1";
+                    document.getElementById('debugStatus').innerText = "ԿԱՊԸ ՀԱՍՏԱՏՎԱԾ Է";
+                    document.getElementById('debugStatus').style.color = "#32CD32";
                 } else {
-                    console.error("Firestore-ում չկա այսպիսի Document ID:", userEmail);
-                    document.getElementById('dispCoins').innerText = "ԴԱՏԱ ՉԿԱ";
-                    document.getElementById('dispLevel').innerText = "?";
+                    document.getElementById('dispCoins').innerText = "0";
+                    document.getElementById('debugStatus').innerText = "ՍԽԱԼ. Բազայում չկա պանակ '" + userEmail + "' անունով";
+                    console.error("Firestore Error: No document found with ID:", userEmail);
                 }
-            }, (error) => {
-                console.error("Firestore սխալ:", error.message);
-                if (error.message.includes("permissions")) {
-                    document.getElementById('dispCoins').innerText = "RULES ՍԽԱԼ";
-                }
+            }, (err) => {
+                document.getElementById('debugStatus').innerText = "ERROR: Permission Denied (Ստուգիր Rules-ը)";
+                console.error(err);
             });
         } else {
             window.location.href = "index.html";
         }
     });
 </script>
-
 </body>
 </html>
