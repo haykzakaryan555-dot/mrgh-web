@@ -38,28 +38,37 @@
     const auth = getAuth(app);
 
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const uid = user.uid; // Սա հենց Xg6ls...2-ն է
-            
-            // ՈՒՂՂՎԱԾ ՃԱՆԱՊԱՐՀ: Ուղղակի users պանակի մեջ
-            const docRef = doc(db, "users", uid);
+    if (user) {
+        // Սա քո UID-ն է, որը կայքը տեսնում է
+        const uid = user.uid; 
+        console.log("Փնտրում եմ UID:", uid);
 
+        // ՄԵՔԵՆԱՅԱԿԱՆ ՈՐՈՆՈՒՄ. սա կստուգի և՛ պարզ, և՛ խորը հասցեները
+        const paths = [
+            doc(db, "users", uid),
+            doc(db, "users", "users", "users", uid)
+        ];
+
+        paths.forEach((docRef) => {
             onSnapshot(docRef, (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    document.getElementById('coins').innerText = data.coins;
-                    document.getElementById('lvl').innerText = data.level;
-                    document.getElementById('status').innerText = "✅ ԿԱՊԸ ՀԱՍՏԱՏՎԱԾ Է";
+                    document.getElementById('dispCoins').innerText = data.coins;
+                    document.getElementById('dispLevel').innerText = data.level;
+                    document.getElementById('status').innerText = "ՎԵՐՋԱՊԵՍ ԳՏԱՎ! ✅";
                     document.getElementById('status').style.color = "#32CD32";
-                } else {
-                    document.getElementById('status').innerHTML = 
-                        "<span style='color:#ff4444'>❌ Տվյալը չկա:</span><br>Համոզվիր, որ Firestore-ում 'users' պանակի մեջ կա տող <br><b>" + uid + "</b> անունով";
                 }
             });
-        } else {
-            window.location.href = "index.html";
-        }
-    });
+        });
+
+        // Եթե 5 վայրկյան հետո էլի 0 է, ուրեմն բազայում տառասխալ կա
+        setTimeout(() => {
+            if (document.getElementById('dispCoins').innerText === "...") {
+                document.getElementById('status').innerText = "Էլի չտեսավ: Ստուգիր 'coins' բառի ուղղագրությունը:";
+            }
+        }, 5000);
+    }
+});
 </script>
 </body>
 </html>
