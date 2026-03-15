@@ -2,29 +2,28 @@
 <html lang="hy">
 <head>
     <meta charset="UTF-8">
-    <title>MRGH - Dashboard Fixed</title>
+    <title>MRGH - FINAL FIX</title>
     <link href="https://fonts.cdnfonts.com/css/minecraft-ia" rel="stylesheet">
     <style>
-        body { background: #1e1e1e; font-family: 'Minecraft', sans-serif; color: white; text-align: center; }
-        .stats { margin-top: 50px; font-size: 24px; }
-        .gold { color: #FFD700; }
-        #debugStatus { margin-top: 20px; font-size: 14px; }
+        body { background: #1a1a1a; color: white; font-family: 'Minecraft', sans-serif; text-align: center; padding: 50px; }
+        .box { border: 4px solid #555; padding: 20px; display: inline-block; background: #333; }
+        #coins { color: #FFD700; font-size: 40px; }
     </style>
 </head>
 <body>
 
-    <div class="stats">
-        LEVEL: <span id="dispLevel" style="color: #32CD32;">...</span> | 
-        COINS: <span id="dispCoins" class="gold">...</span>
+    <div class="box">
+        <h1>LEVEL: <span id="lvl">0</span></h1>
+        <h1>COINS: <span id="coins">0</span></h1>
+        <div id="st" style="font-size: 10px; color: #888; margin-top: 10px;">Սպասիր...</div>
     </div>
-
-    <div id="debugStatus">Կապակցում...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // !!! ՀԱՅԿ, ԱՅՍՏԵՂ ԴԻՐ ՔՈ PROJECT SETTINGS-ԻՑ ՎԵՐՑՐԱԾ ԿՈԴԸ !!!
     const firebaseConfig = {
         apiKey: "AIzaSyDC8NLaKxVPNZlVyRyra_KfDK3KD0ZKcYo",
         authDomain: "mrgh-project.firebaseapp.com",
@@ -35,26 +34,23 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Հայկ, քո նկարում ճանապարհը սա է՝ users (coll) -> users (doc) -> users (sub-coll) -> UID (doc)
-            const uid = user.uid; 
-            const docRef = doc(db, "users", "users", "users", uid);
+            // Սա ամենակարճ ու ճիշտ ճանապարհն է
+            // Եթե քո նկարի պես ես սարքել, ուրեմն սա է.
+            const docRef = doc(db, "users", "users", "users", user.uid);
 
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    document.getElementById('dispCoins').innerText = data.coins;
-                    document.getElementById('dispLevel').innerText = data.level;
-                    document.getElementById('debugStatus').innerText = "ՎԵՐՋԱՊԵՍ ԿՊԱՎ! ✅";
-                    document.getElementById('debugStatus').style.color = "#32CD32";
+            onSnapshot(docRef, (snap) => {
+                if (snap.exists()) {
+                    const d = snap.data();
+                    document.getElementById('coins').innerText = d.coins;
+                    document.getElementById('lvl').innerText = d.level;
+                    document.getElementById('st').innerText = "ՄԻԱՑՎԱԾ Է ✅";
                 } else {
-                    document.getElementById('debugStatus').innerHTML = 
-                        "Տվյալը չկա այս հասցեում: <br> users/users/users/" + uid;
-                    document.getElementById('debugStatus').style.color = "#ff4444";
+                    document.getElementById('st').innerText = "Տվյալը չկա: UID-ն՝ " + user.uid;
                 }
             });
         }
