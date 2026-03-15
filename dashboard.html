@@ -2,20 +2,21 @@
 <html lang="hy">
 <head>
     <meta charset="UTF-8">
-    <title>MRGH - FINAL FIX</title>
+    <title>MRGH - Dashboard</title>
     <link href="https://fonts.cdnfonts.com/css/minecraft-ia" rel="stylesheet">
     <style>
-        body { background: #1a1a1a; color: white; font-family: 'Minecraft', sans-serif; text-align: center; padding: 50px; }
-        .box { border: 4px solid #555; padding: 20px; display: inline-block; background: #333; }
-        #coins { color: #FFD700; font-size: 40px; }
+        body { background: #1e1e1e; font-family: 'Minecraft', sans-serif; color: white; text-align: center; margin: 0; padding: 50px; }
+        .stats { border: 4px solid #3c3c3c; background: rgba(0,0,0,0.8); padding: 30px; display: inline-block; }
+        #coins { color: #FFD700; font-size: 35px; }
+        #lvl { color: #32CD32; font-size: 35px; }
     </style>
 </head>
 <body>
 
-    <div class="box">
+    <div class="stats">
         <h1>LEVEL: <span id="lvl">0</span></h1>
         <h1>COINS: <span id="coins">0</span></h1>
-        <div id="st" style="font-size: 10px; color: #888; margin-top: 10px;">Սպասիր...</div>
+        <div id="status" style="margin-top:20px; font-size:12px;">Ստուգում...</div>
     </div>
 
 <script type="module">
@@ -23,7 +24,6 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // !!! ՀԱՅԿ, ԱՅՍՏԵՂ ԴԻՐ ՔՈ PROJECT SETTINGS-ԻՑ ՎԵՐՑՐԱԾ ԿՈԴԸ !!!
     const firebaseConfig = {
         apiKey: "AIzaSyDC8NLaKxVPNZlVyRyra_KfDK3KD0ZKcYo",
         authDomain: "mrgh-project.firebaseapp.com",
@@ -39,20 +39,23 @@
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Սա ամենակարճ ու ճիշտ ճանապարհն է
-            // Եթե քո նկարի պես ես սարքել, ուրեմն սա է.
-            const docRef = doc(db, "users", "users", "users", user.uid);
+            const uid = user.uid;
+            
+            // Փորձում ենք կարդալ այն հասցեից, որտեղ հաստատ ավելացրել ես
+            const docRef = doc(db, "users", "users", "users", uid);
 
             onSnapshot(docRef, (snap) => {
                 if (snap.exists()) {
-                    const d = snap.data();
-                    document.getElementById('coins').innerText = d.coins;
-                    document.getElementById('lvl').innerText = d.level;
-                    document.getElementById('st').innerText = "ՄԻԱՑՎԱԾ Է ✅";
+                    const data = snap.data();
+                    document.getElementById('coins').innerText = data.coins;
+                    document.getElementById('lvl').innerText = data.level;
+                    document.getElementById('status').innerText = "✅ ԿԱՊԸ ՀԱՍՏԱՏՎԱԾ Է";
                 } else {
-                    document.getElementById('st').innerText = "Տվյալը չկա: UID-ն՝ " + user.uid;
+                    document.getElementById('status').innerText = "❌ Տվյալը չկա այս UID-ով: " + uid;
                 }
             });
+        } else {
+            window.location.href = "index.html";
         }
     });
 </script>
