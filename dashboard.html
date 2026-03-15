@@ -16,7 +16,7 @@
     <div class="stats">
         <h1>LEVEL: <span id="lvl">0</span></h1>
         <h1>COINS: <span id="coins">0</span></h1>
-        <div id="status" style="margin-top:20px; font-size:12px;">Ստուգում...</div>
+        <div id="status" style="margin-top:20px; font-size:12px;">Ստուգում եմ...</div>
     </div>
 
 <script type="module">
@@ -39,10 +39,10 @@
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            const uid = user.uid;
+            const uid = user.uid; // Սա հենց Xg6ls...2-ն է
             
-            // Փորձում ենք կարդալ այն հասցեից, որտեղ հաստատ ավելացրել ես
-            const docRef = doc(db, "users", "users", "users", uid);
+            // ՈՒՂՂՎԱԾ ՃԱՆԱՊԱՐՀ: Ուղղակի users պանակի մեջ
+            const docRef = doc(db, "users", uid);
 
             onSnapshot(docRef, (snap) => {
                 if (snap.exists()) {
@@ -50,8 +50,10 @@
                     document.getElementById('coins').innerText = data.coins;
                     document.getElementById('lvl').innerText = data.level;
                     document.getElementById('status').innerText = "✅ ԿԱՊԸ ՀԱՍՏԱՏՎԱԾ Է";
+                    document.getElementById('status').style.color = "#32CD32";
                 } else {
-                    document.getElementById('status').innerText = "❌ Տվյալը չկա այս UID-ով: " + uid;
+                    document.getElementById('status').innerHTML = 
+                        "<span style='color:#ff4444'>❌ Տվյալը չկա:</span><br>Համոզվիր, որ Firestore-ում 'users' պանակի մեջ կա տող <br><b>" + uid + "</b> անունով";
                 }
             });
         } else {
