@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <title>MRGH - Login</title>
+    <style>
+        body { background: #ffffff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { padding: 40px; border-radius: 25px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 300px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #000; color: #fff; border: none; padding: 15px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Մուտք MRGH</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="pass" placeholder="Գաղտնաբառ">
+    <button onclick="login()">Մուտք գործել</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDC8NLaKxVPNZlVyRyra_KfDK3KD0ZKcYo",
+        authDomain: "mrgh-project.firebaseapp.com",
+        projectId: "mrgh-project",
+        storageBucket: "mrgh-project.firebasestorage.app",
+        messagingSenderId: "128834044854",
+        appId: "1:128834044854:web:ce5e8dac90395ffeddf717"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.login = function() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        signInWithEmailAndPassword(auth, email, pass)
+            .then(() => { window.location.href = "index.html"; })
+            .catch((err) => { alert("Սխալ տվյալներ"); });
+    }
+</script>
+</body>
+</html>

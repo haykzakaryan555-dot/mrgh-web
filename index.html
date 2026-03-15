@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <title>MRGH - Dashboard</title>
+    <style>
+        body { background: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-top: 80px; }
+        header { position: fixed; top: 0; width: 100%; height: 70px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; padding: 0 20px; z-index: 10; }
+        .rank-img { width: 50px; height: 50px; border-radius: 50%; background: #eee; margin-right: 15px; border: 1px solid #ddd; }
+        .stats { font-weight: bold; color: #333; }
+        
+        .container { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; gap: 20px; }
+        .card { width: 250px; background: #fff; border: 1px solid #f0f0f0; border-radius: 30px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-align: center; }
+        .btn { background: #2196F3; color: #fff; border: none; padding: 10px 20px; border-radius: 15px; cursor: pointer; margin-top: 15px; }
+
+        /* Modal */
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 30px; border-radius: 25px; box-shadow: 0 0 50px rgba(0,0,0,0.1); z-index: 100; width: 350px; }
+        .close { float: right; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <img id="rankIcon" class="rank-img" src="" alt="">
+    <div class="stats">
+        Level: <span id="dispLevel">1</span> | Coins: <span id="dispCoins">0</span>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h3>Minecraft Tasks</h3>
+        <p>Տես քո առաջադրանքները</p>
+        <button class="btn" onclick="showTasks()">Բացել</button>
+    </div>
+</div>
+
+<div id="modal">
+    <span class="close" onclick="closeModal()">X</span>
+    <h3>Առաջադրանքներ</h3>
+    <div id="tasksList">
+        <p>1. Կառուցիր ֆերմա</p>
+    </div>
+    <button class="btn" style="width:100%" onclick="window.location.href='https://minecraft.net'">Խաղալ</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDC8NLaKxVPNZlVyRyra_KfDK3KD0ZKcYo",
+        authDomain: "mrgh-project.firebaseapp.com",
+        projectId: "mrgh-project",
+        storageBucket: "mrgh-project.firebasestorage.app",
+        messagingSenderId: "128834044854",
+        appId: "1:128834044854:web:ce5e8dac90395ffeddf717"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Երբ լոգին է լինում, միանգամից կապվում ենք բազային (Live Update)
+            onSnapshot(doc(db, "users", user.email), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('dispCoins').innerText = data.coins || 0;
+                    document.getElementById('dispLevel').innerText = data.level || 1;
+                    document.getElementById('rankIcon').src = data.rank_img || "";
+                }
+            });
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    window.showTasks = () => document.getElementById('modal').style.display = 'block';
+    window.closeModal = () => document.getElementById('modal').style.display = 'none';
+</script>
+</body>
+</html>
